@@ -99,5 +99,11 @@ function animate() {
     connectParticles();
     requestAnimationFrame(animate);
 }
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
 
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas(); // Call once on page load
 //
