@@ -4,11 +4,7 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 let particles = [];
-let mouse = {
-    x: null,
-    y: null,
-    radius: 100
-};
+let mouse = { x: null, y: null, radius: 150 };
 
 // Track mouse position
 canvas.addEventListener('mousemove', function(event) {
@@ -16,7 +12,17 @@ canvas.addEventListener('mousemove', function(event) {
     mouse.y = event.y;
 });
 
-// Create Particle class
+// Helper function to generate a random color
+function getRandomColor() {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+}
+
+// Particle class
 class Particle {
     constructor(x, y, size, speedX, speedY) {
         this.x = x;
@@ -24,38 +30,35 @@ class Particle {
         this.size = size;
         this.speedX = speedX;
         this.speedY = speedY;
+        this.color = 'white';
+        this.randomColor = getRandomColor();
     }
     update() {
-        // Move particle
         this.x += this.speedX;
         this.y += this.speedY;
 
-        // Check boundary collision
         if (this.x > canvas.width || this.x < 0) this.speedX = -this.speedX;
         if (this.y > canvas.height || this.y < 0) this.speedY = -this.speedY;
 
-        // Check mouse proximity
+        // Mouse proximity detection
         const dx = mouse.x - this.x;
         const dy = mouse.y - this.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
-
-        // Repel particles from mouse if close
         if (distance < mouse.radius) {
-            if (mouse.x < this.x) this.x += 3;
-            else this.x -= 3;
-            if (mouse.y < this.y) this.y += 3;
-            else this.y -= 3;
+            this.color = this.randomColor; // Change color if mouse is near to a random color
+        } else {
+            this.color = 'white';
         }
     }
     draw() {
-        ctx.fillStyle = 'white';
+        ctx.fillStyle = this.color;
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
         ctx.fill();
     }
 }
 
-// Initialize particles
+// Create particles
 function init() {
     particles = [];
     for (let i = 0; i < 100; i++) {
@@ -68,22 +71,34 @@ function init() {
     }
 }
 
-// Animate particles
+// Draw lines between nearby particles
+function connectParticles() {
+    for (let i = 0; i < particles.length; i++) {
+        for (let j = i; j < particles.length; j++) {
+            let dx = particles[i].x - particles[j].x;
+            let dy = particles[i].y - particles[j].y;
+            let distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance < 150) {
+                ctx.strokeStyle = particles[i].color === 'white' && particles[j].color === 'white' ? 'white' : getRandomColor(); // Random color for lines
+                ctx.lineWidth = 0.5;
+                ctx.beginPath();
+                ctx.moveTo(particles[i].x, particles[i].y);
+                ctx.lineTo(particles[j].x, particles[j].y);
+                ctx.stroke();
+            }
+        }
+    }
+}
+
+// Animate particles and lines
 function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     particles.forEach(particle => {
         particle.update();
         particle.draw();
     });
+    connectParticles();
     requestAnimationFrame(animate);
 }
 
-// Adjust canvas size on window resize
-window.addEventListener('resize', function() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    init();
-});
-
-init();
-animate();
+//
