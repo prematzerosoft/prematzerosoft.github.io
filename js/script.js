@@ -79,7 +79,7 @@ function connectParticles() {
             let dy = particles[i].y - particles[j].y;
             let distance = Math.sqrt(dx * dx + dy * dy);
             if (distance < 150) {
-                ctx.strokeStyle = particles[i].color === 'white' && particles[j].color === 'white' ? 'white' : getRandomColor(); // Random color for lines
+                ctx.strokeStyle = particles[i].color !== 'white' || particles[j].color !== 'white' ? getRandomColor() : 'white'; // Ensure color
                 ctx.lineWidth = 0.5;
                 ctx.beginPath();
                 ctx.moveTo(particles[i].x, particles[i].y);
@@ -89,7 +89,6 @@ function connectParticles() {
         }
     }
 }
-
 // Animate particles and lines
 function animate() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
